@@ -1,143 +1,64 @@
 import kotlinx.coroutines.*
-import java.net.URL
-import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.Callable
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.coroutines.*
 
-suspend fun main() {
-    println(
-        " suspendThreadId = "
-                + Thread.currentThread().id
-    )
+//suspend fun main() {
+//    var coroutineContext: CoroutineContext = EmptyCoroutineContext
+//    coroutineContext += CoroutineName("co-01")
+//    coroutineContext += LogInterceptor()
+//    coroutineContext += CoroutineExceptionHandler {
+//
+//    }
 //    val continuation = suspend {
 //        println(
-//            " suspendThreadId = "
+//            "suspendThreadId = "
 //                    + Thread.currentThread().id
 //        )
-//        print("In Coroutine.")
+//        println("In Coroutine.")
+//        println((coroutineContext[CoroutineName] as CoroutineName).name)
 //        5
-//    }.startCoroutine(object: Continuation<Int> {
+//    }.createCoroutine(object : Continuation<Int> {
 //        override val context: CoroutineContext
-//            get() = EmptyCoroutineContext
+//            get() = coroutineContext
 //
-//        override fun resumeWith(result: Result<Int>) {println(
-//            " suspendThreadId = "
-//                    + Thread.currentThread().id
-//        )
+//        override fun resumeWith(result: Result<Int>) {
+//            println(
+//                "resumeWithThreadId = "
+//                        + Thread.currentThread().id
+//            )
 //            println("Coroutine End: $result")
 //        }
-//
 //    })
+//
+//
 //    continuation.resume(Unit)
-    callLaunchCoroutine()
-    delay(100)
-}
+//    println("main end")
+//    delay(1000)
+//}
 
-fun <R, T> launchCoroutine(receiver: R, block: suspend R.() -> T) {
-    block.startCoroutine(receiver, object : Continuation<T> {
-        override val context = EmptyCoroutineContext
+fun main() {
+    suspend {
+        suspendFunc01(1)
+        suspendFunc02("Hello", "World")
+        suspendFunc02("Hello", "Kotlin")
+    }.startCoroutine(object : Continuation<Int> {
+        override val context: CoroutineContext
+            get() = LogInterceptor()
 
-        override fun resumeWith(result: Result<T>) {
+        override fun resumeWith(result: Result<Int>) {
             println("Coroutine End: $result")
         }
 
     })
 }
 
-class ProducerScope<T> {
-    suspend fun produce(value: T) {
-        println("$value")
+suspend fun suspendFunc01(a: Int) {}
+suspend fun suspendFunc02(a: String, b: String) = suspendCoroutine<Int> {
+    thread {
+        println("suspendFunc02")
+        it.resumeWith(Result.success(5))
     }
 }
 
-@RestrictsSuspension
-class RestrictProducerScope<T> {
-    suspend fun produce(value: T) {
-        println("$value")
-    }
-}
 
-fun callLaunchCoroutine() {
-    launchCoroutine(ProducerScope<Int>()) {
-        println(
-            " suspendThreadId = "
-                    + Thread.currentThread().id
-        )
-        println("In Coroutine.")
-        produce(1024)
-        delay(1000)
-        produce(2048)
-    }
-}
-//fun main(args: Array<String>) {
-//    Callable {
-//
-//    }
-//    val ioExecutor = Executors.newSingleThreadExecutor()
-//    val future = ioExecutor.submit {
-//
-//    }
-//    future.cancel(true)
-//
-//    val thread = thread {  }
-//    val url:String = "sdf"
-//    url.transform {
-//        bitmapCompletableFuture(it)
-//    }.let {
-//        CompletableFuture.allOf().thenApply {
-//        }
-//    }
-//    thread.interrupt()
-//    println(
-//        " mainThreadId = "
-//                + Thread.currentThread().id
-//                + ",,,threadName = " + Thread.currentThread().name
-//                + ",,,时间" + Date().toString()
-//    )
-//    val executorService = Executors.newSingleThreadScheduledExecutor()
-//    executorService.scheduleWithFixedDelay({        println(
-//            " 开始 threadId = "
-//                    + Thread.currentThread().id
-//                    + ",,,threadName = " + Thread.currentThread().name
-//                    + ",,,时间" + Date().toString()
-//        )
-//        GlobalScope.launch {
-//            println(
-//            " GlobalScope threadId = "
-//                    + Thread.currentThread().id
-//                    + ",,,threadName = " + Thread.currentThread().name
-//                    + ",,,时间" + Date().toString()
-//            )
-//            withContext(Dispatchers.Default ) {
-//                println(
-//                    " Main threadId = "
-//                            + Thread.currentThread().id
-//                            + ",,,threadName = " + Thread.currentThread().name
-//                            + ",,,时间" + Date().toString()
-//                )
-//            }
-//        }
-//    },1,5, TimeUnit.SECONDS)
-//}
 
-fun bitmapCompletableFuture(url: String): CompletableFuture<Boolean> = CompletableFuture.supplyAsync {
-    return@supplyAsync false
-}
-
-suspend fun bitmapSuspendable(url: String): Boolean =
-    suspendCoroutine {
-        thread {
-            try {
-                it.resume(true)
-            } catch (e: Exception) {
-                it.resumeWithException(e)
-            }
-        }
-    }
